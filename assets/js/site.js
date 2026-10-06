@@ -78,61 +78,6 @@
   }
 
 
-  /* 6. Intro loader — counts up, then wipes away --------------------------- */
-  (function loader() {
-    var box = document.querySelector('.loader');
-    if (!box) return;
-    var out = box.querySelector('[data-count]');
-    var bar = box.querySelector('[data-count-bar]');
-    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-              || /[?&](nointro|still)/.test(location.search);
-
-    function done() {
-      document.documentElement.classList.add('is-loaded');
-      setTimeout(function () { box.remove(); }, 1100);
-    }
-    if (reduce) { document.documentElement.classList.add('is-loaded'); box.remove(); return; }
-
-    var n = 0, t0 = null;
-    // ~1.5s, eased so it slows near the end like a real progress bar
-    function tick(ts) {
-      if (t0 === null) t0 = ts;
-      var k = Math.min(1, (ts - t0) / 1500);
-      n = Math.round((1 - Math.pow(1 - k, 2.2)) * 100);
-      out.textContent = n < 10 ? '0' + n : String(n);
-      if (bar) bar.style.transform = 'scaleX(' + (n / 100) + ')';
-      if (k < 1) requestAnimationFrame(tick);
-      else setTimeout(done, 180);
-    }
-    requestAnimationFrame(tick);
-  })();
-
-  /* 7. HUD: live local clock + scroll percentage --------------------------- */
-  (function hud() {
-    var clock = document.querySelector('[data-clock]');
-    if (clock) {
-      var tickClock = function () {
-        var d = new Date();
-        var pad = function (v) { return v < 10 ? '0' + v : String(v); };
-        clock.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
-      };
-      tickClock();
-      setInterval(tickClock, 1000);
-    }
-
-    var pct = document.querySelector('[data-progress]');
-    if (pct) {
-      var run = function () {
-        var max = document.body.scrollHeight - window.innerHeight;
-        var v = max > 0 ? Math.round((window.scrollY / max) * 100) : 0;
-        pct.textContent = v < 10 ? '00' + v : v < 100 ? '0' + v : '100';
-      };
-      run();
-      window.addEventListener('scroll', run, { passive: true });
-      window.addEventListener('resize', run);
-    }
-  })();
-
   /* 5. Year in the footer ------------------------------------------------- */
   var years = document.querySelectorAll('[data-year]');
   for (var y = 0; y < years.length; y++) years[y].textContent = new Date().getFullYear();

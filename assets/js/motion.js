@@ -102,121 +102,6 @@
   }
 
   /* ======================================================================
-     3. Follow-cursor project index
-     ====================================================================== */
-  function followIndex() {
-    var index = document.querySelector('[data-index]');
-    if (!index || !FINE || REDUCE) return;
-
-    var layer = document.createElement('div');
-    layer.className = 'idx-float';
-    index.appendChild(layer);
-
-    var rows = [].slice.call(index.querySelectorAll('[data-index-img]'));
-    var imgs = rows.map(function (row) {
-      var im = document.createElement('img');
-      im.src = row.getAttribute('data-index-img');
-      im.alt = '';
-      im.setAttribute('aria-hidden', 'true');
-      im.loading = 'lazy';
-      layer.appendChild(im);
-      return im;
-    });
-
-    var tx = 0, ty = 0, cx = 0, cy = 0, active = -1, raf = null;
-
-    function tick() {
-      cx += (tx - cx) * 0.12;
-      cy += (ty - cy) * 0.12;
-      layer.style.transform = 'translate3d(' + cx.toFixed(1) + 'px,' + cy.toFixed(1) + 'px,0)';
-      raf = requestAnimationFrame(tick);
-    }
-
-    index.addEventListener('pointermove', function (ev) {
-      var r = index.getBoundingClientRect();
-      tx = ev.clientX - r.left;
-      ty = ev.clientY - r.top;
-      if (!raf) { cx = tx; cy = ty; tick(); }
-    }, { passive: true });
-
-    rows.forEach(function (row, n) {
-      row.addEventListener('pointerenter', function () {
-        if (active > -1) imgs[active].classList.remove('on');
-        active = n;
-        imgs[n].classList.add('on');
-        layer.classList.add('on');
-        index.classList.add('has-hover');
-        rows.forEach(function (r2) { r2.classList.remove('is-hot'); });
-        row.classList.add('is-hot');
-      });
-    });
-
-    index.addEventListener('pointerleave', function () {
-      if (active > -1) imgs[active].classList.remove('on');
-      active = -1;
-      layer.classList.remove('on');
-      index.classList.remove('has-hover');
-      rows.forEach(function (r2) { r2.classList.remove('is-hot'); });
-      if (raf) { cancelAnimationFrame(raf); raf = null; }
-    });
-  }
-
-  /* ======================================================================
-     4. Custom cursor
-     ====================================================================== */
-  function cursor() {
-    if (!FINE || REDUCE) return;
-
-    var ring = document.createElement('div'); ring.className = 'cur-ring';
-    var dot  = document.createElement('div'); dot.className  = 'cur-dot';
-    var label = document.createElement('span'); label.className = 'cur-label';
-    ring.appendChild(label);
-    document.body.appendChild(ring);
-    document.body.appendChild(dot);
-    document.documentElement.classList.add('has-cursor');
-
-    var mx = innerWidth / 2, my = innerHeight / 2, rx = mx, ry = my;
-
-    document.addEventListener('pointermove', function (e) {
-      mx = e.clientX; my = e.clientY;
-      dot.style.transform = 'translate3d(' + mx + 'px,' + my + 'px,0)';
-    }, { passive: true });
-
-    var idle = 0;
-    (function frame() {
-      var dx = mx - rx, dy = my - ry;
-      rx += dx * 0.17;
-      ry += dy * 0.17;
-      ring.style.transform = 'translate3d(' + rx.toFixed(1) + 'px,' + ry.toFixed(1) + 'px,0)';
-      // stop burning frames once the ring has caught up with the pointer
-      idle = (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1) ? idle + 1 : 0;
-      if (idle < 30) requestAnimationFrame(frame);
-      else running = false;
-    })();
-    var running = true;
-    document.addEventListener('pointermove', function () {
-      if (!running) { running = true; idle = 0; requestAnimationFrame(frame); }
-    }, { passive: true });
-
-    // grow over anything clickable; show a word when one is offered
-    document.addEventListener('pointerover', function (e) {
-      var t = e.target.closest('a, button, input, select, textarea, [data-cursor]');
-      if (!t) return;
-      ring.classList.add('big');
-      var word = t.getAttribute('data-cursor');
-      if (word) { label.textContent = word; ring.classList.add('worded'); }
-    });
-    document.addEventListener('pointerout', function (e) {
-      var t = e.target.closest('a, button, input, select, textarea, [data-cursor]');
-      if (!t) return;
-      ring.classList.remove('big', 'worded');
-      label.textContent = '';
-    });
-    document.addEventListener('pointerdown', function () { ring.classList.add('down'); });
-    document.addEventListener('pointerup',   function () { ring.classList.remove('down'); });
-  }
-
-  /* ======================================================================
      5. Magnetic buttons
      ====================================================================== */
   function magnets() {
@@ -276,8 +161,6 @@
   /* ---- go ---------------------------------------------------------------- */
   function boot() {
     doSplit();
-    followIndex();
-    cursor();
     magnets();
     parallax();
     // first screen animates in immediately rather than waiting for a scroll

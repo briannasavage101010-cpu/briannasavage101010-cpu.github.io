@@ -73,14 +73,14 @@
 
   // champagne -> rose, sampled per particle so the drawing has tonal variety
   var RAMP = [
-    [ 77, 141, 255],   // blue
-    [143, 186, 255],   // pale blue
-    [227, 181, 103],   // gold
-    [255,  95, 168]    // pink (rare, used sparingly)
+    [ 70, 120, 205],   // muted blue, the dominant tone
+    [128, 160, 210],   // pale steel
+    [196, 160, 100],   // gold, occasional
+    [200, 120, 160]    // soft rose, rare
   ];
   function pickColor() {
     var r = Math.random();
-    var i = r < 0.42 ? 0 : r < 0.76 ? 1 : r < 0.96 ? 2 : 3;
+    var i = r < 0.52 ? 0 : r < 0.88 ? 1 : r < 0.985 ? 2 : 3;
     var c = RAMP[i];
     return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',';
   }
@@ -92,7 +92,7 @@
     p.max = 180 + Math.random() * 520;
     p.w = 0.4 + Math.random() * 1.15;
     p.col = pickColor();
-    p.a = 0.042 + Math.random() * 0.100;
+    p.a = 0.026 + Math.random() * 0.060;
     return p;
   }
 
@@ -110,7 +110,7 @@
     ctx.lineCap = 'round';
 
     // particle budget scales with area so phones don't cook
-    COUNT = Math.round(Math.min(620, Math.max(140, (W * H) / 2100)));
+    COUNT = Math.round(Math.min(620, Math.max(140, (W * H) / 2900)));
     P.length = 0;
     for (var i = 0; i < COUNT; i++) P.push(spawn({}));
     frames = 0;
